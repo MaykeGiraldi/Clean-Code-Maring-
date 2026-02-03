@@ -1,36 +1,7 @@
-const reveals = document.querySelectorAll('.reveal');
-
-const observer = new IntersectionObserver(
-  (entries, observer) => {
-    entries.forEach(entry => {
-      if (entry.isIntersecting) {
-
-        // força reflow para garantir animação consistente
-        entry.target.style.transition = 'none';
-        entry.target.offsetHeight;
-        entry.target.style.transition = '';
-
-        entry.target.classList.add('active');
-        observer.unobserve(entry.target);
-      }
-    });
-  },
-  {
-    threshold: 0.25,              // entra só quando estiver bem visível
-    rootMargin: '0px 0px -80px 0px'
-  }
-);
-
-reveals.forEach(el => observer.observe(el));
-
-
 /* ===============================
    HEADER SCROLL (JS ONLY)
 ================================ */
-
 const header = document.getElementById('header');
-
-let lastScroll = 0;
 
 window.addEventListener('scroll', () => {
   const currentScroll = window.scrollY;
@@ -45,15 +16,12 @@ window.addEventListener('scroll', () => {
     header.style.backdropFilter = '';
     header.style.boxShadow = '';
   }
-
-  lastScroll = currentScroll;
 });
 
 
 /* ===============================
    BUTTON ANIMATION (JS ONLY)
 ================================ */
-
 const buttons = [
   document.getElementById('btn-hero'),
   document.getElementById('btn-cta')
@@ -70,7 +38,83 @@ buttons.forEach(button => {
   });
 
   button.addEventListener('mouseleave', () => {
-    button.style.transform = 'translateY(0) scale(1)';
+    button.style.transform = 'translateY(0)';
     button.style.boxShadow = '';
+  });
+});
+
+
+/* ===============================
+   SCROLL SUAVE NAV (ÚNICO)
+================================ */
+document.querySelectorAll('a[href^="#"]').forEach(link => {
+  link.addEventListener('click', function (e) {
+    e.preventDefault();
+
+    const targetId = this.getAttribute('href');
+    const targetSection = document.querySelector(targetId);
+    if (!targetSection) return;
+
+    const headerOffset = header ? header.offsetHeight : 0;
+
+    const targetPosition =
+      targetSection.getBoundingClientRect().top +
+      window.pageYOffset -
+      headerOffset;
+
+    window.scrollTo({
+      top: targetPosition,
+      behavior: 'smooth'
+    });
+  });
+});
+
+
+/* ===============================
+   REVEAL (ROBUSTO E DEFINITIVO)
+================================ */
+const reveals = document.querySelectorAll('.reveal');
+
+// garante estado inicial SEM animação
+reveals.forEach(el => {
+  el.classList.remove('active');
+});
+
+const revealObserver = new IntersectionObserver(
+  (entries, observer) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        entry.target.classList.add('active');
+        observer.unobserve(entry.target); // anima só uma vez
+      }
+    });
+  },
+  {
+    threshold: 0.2,
+    rootMargin: '0px 0px -80px 0px'
+  }
+);
+
+// inicia após tudo carregar
+window.addEventListener('load', () => {
+  reveals.forEach(el => revealObserver.observe(el));
+});
+
+/* ===============================
+   CARD HOVER ANIMATION (JS ONLY)
+================================ */
+const cards = document.querySelectorAll('.card');
+
+cards.forEach(card => {
+  card.style.transition = 'transform 0.35s ease, box-shadow 0.35s ease';
+
+  card.addEventListener('mouseenter', () => {
+    card.style.transform = 'scale(1.04)';
+    card.style.boxShadow = '0 25px 60px rgba(31,58,95,0.35)';
+  });
+
+  card.addEventListener('mouseleave', () => {
+    card.style.transform = 'scale(1)';
+    card.style.boxShadow = '';
   });
 });
